@@ -41,6 +41,11 @@ Payloads are currently formatted like this:
           "percentiles": {
             "999": 1.22222,
             "98": 1.11111
+          },
+          "histogram": {
+            "bin_50": 0,
+            "bin_100": 0,
+            "bin_inf": 0
           }
         }
       },
