@@ -14,6 +14,7 @@ function checkSameGauge(assert, gauge, longName) {
 }
 
 function checkSameTimer(assert, timer, longName) {
+  var foundPercentiles = false;
   assert.strictEqual(parsedObj.timer_data[longName].count, timer.count);
   assert.strictEqual(parsedObj.timer_data[longName].count_ps, timer.rate);
   assert.strictEqual(parsedObj.timer_data[longName].lower, timer.min);
@@ -22,9 +23,17 @@ function checkSameTimer(assert, timer, longName) {
   assert.strictEqual(parsedObj.timer_data[longName].median, timer.median);
   assert.strictEqual(parsedObj.timer_data[longName].std, timer.std);
   assert.ok(parsedObj.hasOwnProperty('pctThreshold') && parsedObj.pctThreshold.length > 0);
-  parsedObj.pctThreshold.forEach(function(percentile) {
-    assert.strictEqual(parsedObj.timer_data[longName][percentile], timer.percentiles[percentile]);
+  assert.ok(timer.hasOwnProperty('percentiles'));
+  // there should be one for each of pctThreshold, except for 999, which usually gets cut for being incomplete.
+  assert.ok(parsedObj.pctThreshold.length - Object.keys(timer.percentiles).length <= 1);
+  
+  Object.keys(timer.percentiles).forEach(function(percentile) {
+    assert.strictEqual(parsedObj.timer_data[longName]['mean_' + percentile], timer.percentiles[percentile].avg);
+    assert.strictEqual(parsedObj.timer_data[longName]['upper_' + percentile], timer.percentiles[percentile].max);
+    assert.strictEqual(parsedObj.timer_data[longName]['sum_' + percentile], timer.percentiles[percentile].sum);
+    foundPercentiles = true;
   });
+  assert.ok(foundPercentiles);
 }
 
 function checkSameSet(assert, set, longName) {
@@ -99,8 +108,7 @@ exports['test_sets'] = function(test, assert) {
 exports['test_timers'] = function(test, assert) {
   var timers = metric_utils.extractTimers(parsedObj),
       names = ['4444444.T1s',  '3333333.T200ms', '3333333.T10s', '3333333.T29s'],
-      visitCount = 0,
-      percentileCount = 0;
+      visitCount = 0;
   
   assert.ok(parsedObj.hasOwnProperty('pctThreshold'));
   assert.strictEqual(5, parsedObj.pctThreshold.length);
@@ -108,18 +116,11 @@ exports['test_timers'] = function(test, assert) {
   assert.strictEqual(0, visitCount);
   
   names.forEach(function(key) {
-    assert.ok(timers[key].hasOwnProperty('percentiles'));
-    assert.strictEqual(parsedObj.pctThreshold.length, Object.keys(timers[key].percentiles).length);
-    parsedObj.pctThreshold.forEach(function(percentile) {
-      assert.strictEqual(parsedObj.timer_data[key][percentile], timers[key].percentiles[percentile]);
-      percentileCount += 1;
-    });
     checkSameTimer(assert, timers[key], key);
     visitCount += 1;
   });
   
   assert.strictEqual(visitCount, 4);
-  assert.strictEqual(percentileCount, 4 * 5); // num_timers * num_percentiles_per_timer
   
   test.finish();
 }
