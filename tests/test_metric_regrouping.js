@@ -174,6 +174,54 @@ exports['test_grouping_by_parsed_tenant'] = function(test, assert) {
   checkSameSet(assert, tenantMap['3333333'].sets['S500ms'], '3333333.S500ms');
   
   test.finish();
+}
+
+exports['test_specific_histogram_extraction'] = function(test, assert) {
+  // 4444444.T1s should only have four bins.
+  var tenantInfo = metric_utils.groupMetricsByTenant(parsedObj)['4444444'],
+      timer;
   
+  assert.ok(tenantInfo.hasOwnProperty('timers'));
+  assert.ok(tenantInfo.timers.hasOwnProperty('T1s'));
   
+  timer = tenantInfo.timers.T1s;
+  
+  assert.ok(timer.hasOwnProperty('histogram'));
+  assert.deepEqual(['bin_100', 'bin_250', 'bin_500', 'bin_inf'], Object.keys(timer.histogram));
+  
+  test.finish();
+}
+
+exports['test_specific_histogram_exclusion'] = function(test, assert) {
+  // 3333333.T10s should have no histogram.
+  var tenantInfo = metric_utils.groupMetricsByTenant(parsedObj)['3333333'],
+      timer;
+  
+  assert.ok(tenantInfo.hasOwnProperty('timers'));
+  assert.ok(tenantInfo.timers.hasOwnProperty('T10s'));
+    
+  timer = tenantInfo.timers.T10s;
+  
+  assert.ok(!timer.hasOwnProperty('histogram'));
+  
+  test.finish();
+}
+
+exports['test_catch_all_histogram_extraction'] = function(test, assert) {
+  // '3333333.T200ms', '3333333.T29s' should have 11 bins.
+  var tenantInfo = metric_utils.groupMetricsByTenant(parsedObj)['3333333'],
+      timers = ['T200ms', 'T29s'],
+      visitCount = 0;
+  
+  assert.ok(tenantInfo.hasOwnProperty('timers'));
+  
+  timers.forEach(function(timerName) {
+    assert.ok(tenantInfo.timers.hasOwnProperty(timerName));
+    assert.strictEqual(11, Object.keys(tenantInfo.timers[timerName].histogram).length);
+    visitCount += 1;
+  });
+  
+  assert.strictEqual(2, visitCount);
+  
+  test.finish();
 }
