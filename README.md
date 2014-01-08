@@ -1,6 +1,17 @@
 # Blueflood StatsD Backend
 
-Assumed endpoint is http://host:port/v1.0/:tenantId/experimental/metrics/ingest_bundle.
+Assumed endpoint is http://host:port/v1.0/:tenantId/experimental/metrics/statsd.
+
+There are two ways of using this backend:
+1. static tenant - tenant is specified in the `blueflood` part of the statsD configuration.  Here is an example:
+    "blueflood": {
+      "tenantId": "333333",
+      "endpoint": "http://127.0.0.1:19000"
+    },
+2. parsing tenant - if `tenantId` is not specified in the blueflood part of the statsD configuration, then the backend
+   assumes that the `tenantId` will be the first part of the metric name (up until the first dot).
+   In this case, the single bundle that comes from statsD will be split up into multiple bundles and sent to Blueflood
+   in batches.
 
 Payloads are currently formatted like this:
 
