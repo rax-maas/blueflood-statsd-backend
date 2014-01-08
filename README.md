@@ -3,6 +3,7 @@
 Assumed endpoint is http://host:port/v1.0/:tenantId/experimental/metrics/statsd.
 
 There are two ways of using this backend:
+
 1. static tenant - tenant is specified in the `blueflood` part of the statsD configuration.  Here is an example:
     "blueflood": {
       "tenantId": "333333",
