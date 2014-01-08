@@ -8,28 +8,33 @@ Payloads are currently formatted like this:
       "tenantId": "xxxxxxxx",
       "timestamp": 111111111,
       
-      "gauges": {
-        "gauge_name": {
+      "gauges": [
+        { 
+          "name": "gauge_name",
           "value": 42
         },
-        "another_gauge": {
+        { 
+          "name", "another_gauge",
           "value": 4343
         }
-      },
+      ],
       
-      "counters": {
-        "counter_name": {
+      "counters": [
+        {
+          "name": "counter_name",
           "value": 32,
           "rate": 2.32
         },
-        "another_counter": {
+        {
+          "name": "another_counter",
           "value": 4424,
           "rate": 52.1
         }
-      },
+      ],
       
-      "timers": {
-        "timer_name": {
+      "timers": [
+        {
+          "name": "timer_name",
           "count": 32,
           "rate": 2.3,
           "min": 1,
@@ -48,15 +53,17 @@ Payloads are currently formatted like this:
             "bin_inf": 0
           }
         }
-      },
+      ],
       
-      "sets": {
-        "set_name": {
+      "sets": [
+        {
+          "name": "set_name",
           "values": ["foo", "bar", "baz"]
         },
-        "another_set": {
+        {
+          "name": "another_set",
           "values": ["boo", "far", "zab"]
         }
-      }
+      ]
     }
 
