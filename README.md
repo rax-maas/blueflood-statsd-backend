@@ -16,8 +16,9 @@ Your [statsD configuration file](https://github.com/etsy/statsd/blob/master/exam
 section similar to the way you would have one for graphite or the console if you were using those backends.
 
 Here are the values that are currently honored:
-    tenantId:         [required] This tenantId will be used to publish metrics to Blueflood.
-    endpoint:         [required] The location of the API. e.g.: 'http://metrics.example.com:8080' 
+
+* `tenantId`: (required) This tenantId will be used to publish metrics to Blueflood.
+* `endpoint`: (required) The location of the API. e.g.: 'http://metrics.example.com:8080' 
 
 Example configuration:
 
