@@ -95,3 +95,6 @@ Payloads sent to Blueflood are currently formatted like this:
       ]
     }
 
+## License
+
+This code is licensed under the Apache 2.0 open source license.
