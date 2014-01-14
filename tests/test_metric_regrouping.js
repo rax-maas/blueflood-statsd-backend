@@ -1,6 +1,7 @@
 
 var fs = require('fs');
 var metric_utils = require('../lib/metric_utils');
+var http_client = require('../lib/blueflood_http_client');
 
 var parsedObj;
 
@@ -151,6 +152,16 @@ function elementWithName(name) {
   }
 }
 
+function countMetrics(json) {
+  var obj = JSON.parse(json),
+      count = 0;
+  count += obj.gauges.length;
+  count += obj.counters.length;
+  count += obj.timers.length;
+  count += obj.sets.length;
+  return count;
+}
+
 exports['test_grouping_by_parsed_tenant'] = function(test, assert) {
   var tenantMap = metric_utils.groupMetricsByTenant(parsedObj),
       tenants = ['3333333', '4444444', 'internal'];
@@ -232,6 +243,29 @@ exports['test_catch_all_histogram_extraction'] = function(test, assert) {
   });
   
   assert.strictEqual(2, visitCount);
+  
+  test.finish();
+}
+
+// tests that metrics payloads get broken up into acceptable sizes.
+exports['test_bundling'] = function(test, assert) {
+  var gauges = metric_utils.extractGauges(parsedObj),
+      counters = metric_utils.extractCounters(parsedObj),
+      timers = metric_utils.extractTimers(parsedObj),
+      sets = metric_utils.extractSets(parsedObj),
+      jsonArray = http_client.buildPayloadsUnsafe('11111111', 22222222, gauges, counters, timers, sets, 200),
+      actualMetricCount = 0;
+  
+  // it should have been broken up into 12 bundles.
+  assert.strictEqual(12, jsonArray.length);
+  
+  // ensure that we have the expected number of metrics.
+  jsonArray.forEach(function(json) {
+    actualMetricCount += countMetrics(json);
+  });
+  
+  assert.ok(actualMetricCount > 1);
+  assert.strictEqual(gauges.length + counters.length + timers.length + sets.length, actualMetricCount);
   
   test.finish();
 }
