@@ -22,8 +22,7 @@ Here are the values that are currently honored:
 
 Example configuration:
 
-    static tenant - tenant is specified in the `blueflood` part of the statsD configuration.  Here is an example:
-      "blueflood": {
+    "blueflood": {
       "tenantId": "333333",
       "endpoint": "http://127.0.0.1:19000"
     },
