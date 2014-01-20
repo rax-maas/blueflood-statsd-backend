@@ -253,11 +253,11 @@ exports['test_bundling'] = function(test, assert) {
       counters = metric_utils.extractCounters(parsedObj),
       timers = metric_utils.extractTimers(parsedObj),
       sets = metric_utils.extractSets(parsedObj),
-      jsonArray = http_client.buildPayloadsUnsafe('11111111', 22222222, gauges, counters, timers, sets, 200),
+      jsonArray = http_client.buildPayloadsUnsafe('11111111', 22222222, gauges, counters, timers, sets, 15000, 200),
       actualMetricCount = 0;
   
   // it should have been broken up into 12 bundles.
-  assert.strictEqual(12, jsonArray.length);
+  assert.strictEqual(14, jsonArray.length);
   
   // ensure that we have the expected number of metrics.
   jsonArray.forEach(function(json) {
