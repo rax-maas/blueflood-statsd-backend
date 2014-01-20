@@ -1,0 +1,4 @@
+Copyright 2014, Rackspace, Inc.
+
+This module is developed in conjunction with Blueflood (Blueflood.io).
+See LICENSE for licensing and redistribution information.
