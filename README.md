@@ -1,12 +1,12 @@
 # Blueflood StatsD Backend [![Build Status](https://secure.travis-ci.org/gdusbabek/blueflood-statsd-backend.png)](http://travis-ci.org/gdusbabek/blueflood-statsd-backend)
 
 This is a [statsD backend](https://github.com/etsy/statsd/wiki/Backends) that will send metrics aggregated in statsD
-to an instance of Blueflood.
+to an instance of [Blueflood](http://blueflood.io).
 
 ## Blueflood Configuration
 
-The Blueflood statsD endpoint is still a work in progress.  
-You can track its [progress on github](https://github.com/rackerlabs/blueflood/pull/201).
+The Blueflood statsD endpoint is new and has experimental status.  
+See [blueflood/pull/201](https://github.com/rackerlabs/blueflood/pull/201).
 
 Assumed endpoint is http://host:port/v1.0/:tenantId/experimental/metrics/statsd.
 
