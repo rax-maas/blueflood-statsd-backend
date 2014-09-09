@@ -42,7 +42,7 @@ Payloads sent to Blueflood are currently formatted like this:
           "value": 42
         },
         { 
-          "name", "another_gauge",
+          "name":"another_gauge",
           "value": 4343
         }
       ],
