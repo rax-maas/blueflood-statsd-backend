@@ -2,7 +2,8 @@
   "name": "statsd-blueflood-backend",
   "description": "blueflood statsD backend",
   "author": "Gary Dusbabek <gdusbabek@gmail.com>",
-  "version": "0.0.1",
+  "version": "0.0.2",
+  "main": "lib/blueflood.js",
   "dependencies": {
   },
   "devDependencies": {
