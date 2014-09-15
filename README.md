@@ -27,6 +27,9 @@ Example configuration:
       "endpoint": "http://127.0.0.1:19000"
     },
 
+## Detailed Installation Instructions
+https://github.com/gdusbabek/blueflood-statsd-backend/wiki/Installing-the-Blueflood-Statsd-Backend
+
 
 ## Payload format
 
