@@ -1,8 +1,8 @@
 {
-  "name": "statsd-blueflood-backend",
+  "name": "statsd-cm-backend",
   "description": "blueflood statsD backend",
   "author": "Gary Dusbabek <gdusbabek@gmail.com>",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "main": "lib/blueflood.js",
   "dependencies": {
   },
@@ -10,7 +10,7 @@
     "lynx": "0.0.11",
     "whiskey": "0.8.4"
   },
-  "engine": "node >= 0.8.0",
+  "engine": "node >= 0.8.1",
   "scripts": {
     "test": "./scripts/test.sh"
   }
