@@ -1,7 +1,7 @@
 {
-  "name": "statsd-cm-backend",
+  "name": "statsd-blueflood-backend",
   "description": "blueflood statsD backend",
-  "author": "Gary Dusbabek <gdusbabek@gmail.com>",
+  "author": "Gary Dusbabek <gdusbabek@gmail.com>, George Jahad <george.jahad@rackspace.com>, Tilottama Gaat <tilottama.gaat@rackspace.com>",
   "version": "0.0.3",
   "main": "lib/blueflood.js",
   "dependencies": {
