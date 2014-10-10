@@ -5,6 +5,7 @@
   "version": "0.0.3",
   "main": "lib/blueflood.js",
   "dependencies": {
+    "request": "2.45.0"
   },
   "devDependencies": {
     "lynx": "0.0.11",
