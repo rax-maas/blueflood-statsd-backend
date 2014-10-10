@@ -1,16 +1,17 @@
 {
   "name": "statsd-blueflood-backend",
   "description": "blueflood statsD backend",
-  "author": "Gary Dusbabek <gdusbabek@gmail.com>",
-  "version": "0.0.2",
+  "author": "Gary Dusbabek <gdusbabek@gmail.com>, George Jahad <george.jahad@rackspace.com>, Tilottama Gaat <tilottama.gaat@rackspace.com>",
+  "version": "0.0.3",
   "main": "lib/blueflood.js",
   "dependencies": {
+    "request": "2.45.0"
   },
   "devDependencies": {
     "lynx": "0.0.11",
     "whiskey": "0.8.4"
   },
-  "engine": "node >= 0.8.0",
+  "engine": "node >= 0.8.1",
   "scripts": {
     "test": "./scripts/test.sh"
   }
