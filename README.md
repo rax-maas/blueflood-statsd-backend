@@ -27,6 +27,22 @@ Example configuration:
       "endpoint": "http://127.0.0.1:19000"
     },
 
+You can also send metrics into the Rackspace Cloud Metrics API service by adding the follwing auth section to the configuration:
+
+    "blueflood": {
+      "tenantId": "333333",
+      "endpoint": "http://iad.metrics-ingest.api.rackspacecloud.com:80",
+      "authModule": "./auth",
+      "authClass": "RaxAuth",
+      "authParams": {
+        "raxusername": "my_cloud_user_name",
+        "raxapikey": "my_rax_api_key"
+      }
+    }
+    
+If you happen to use some other Openstack identity service, or even something home-grown, you can create your own
+authenticator, just make sure to implement the methods indicated by `auth.EmptyAuth`.
+
 ## Detailed Installation Instructions
 https://github.com/gdusbabek/blueflood-statsd-backend/wiki/Installing-the-Blueflood-Statsd-Backend
 
