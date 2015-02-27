@@ -7,7 +7,7 @@
     "Tilottama Gaat <tilottama.gaat@rackspace.com>",
     "Justin Gallardo <justin.gallardo@rackspace.com>"
   ],
-  "version": "0.0.3",
+  "version": "0.0.4",
   "main": "lib/blueflood.js",
   "dependencies": {
     "request": "2.45.0"
@@ -19,5 +19,21 @@
   "engine": "node >= 0.8.1",
   "scripts": {
     "test": "./node_modules/tape/bin/tape tests/test_*.js"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rackerlabs/blueflood-statsd-backend.git"
+  },
+  "keywords": [
+    "statsd",
+    "blueflood"
+  ],
+  "licenses": [{
+    "type": "Apache-2.0",
+    "url": "http://www.apache.org/licenses/LICENSE-2.0"
+  }],
+  "bugs": {
+    "url": "https://github.com/rackerlabs/blueflood-statsd-backend/issues"
+  },
+  "homepage": "https://github.com/rackerlabs/blueflood-statsd-backend"
 }
