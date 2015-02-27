@@ -14,10 +14,10 @@
   },
   "devDependencies": {
     "lynx": "0.0.11",
-    "whiskey": "0.8.4"
+    "tape": "^3.5.0"
   },
   "engine": "node >= 0.8.1",
   "scripts": {
-    "test": "./scripts/test.sh"
+    "test": "./node_modules/tape/bin/tape tests/test_*.js"
   }
 }

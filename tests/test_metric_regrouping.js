@@ -17,54 +17,57 @@
  */
 
 var fs = require('fs');
+
+var test = require('tape');
+
 var metric_utils = require('../lib/metric_utils');
 var http_client = require('../lib/blueflood_http_client');
 
 var parsedObj;
 
-function checkSameCounter(assert, counter, longName) {
+function checkSameCounter(t, counter, longName) {
   // if the counter doesn't exist, it will be null.
-  assert.ok(counter);
-  assert.strictEqual(parsedObj.counters[longName], counter.value);
-  assert.strictEqual(parsedObj.counter_rates[longName], counter.rate);  
+  t.ok(counter, 'The counter exists.');
+  t.equal(parsedObj.counters[longName], counter.value, 'The counter has the expected value.');
+  t.equal(parsedObj.counter_rates[longName], counter.rate, 'The counter has the expected rate.');
 }
 
-function checkSameGauge(assert, gauge, longName) {
-  assert.ok(gauge);
-  assert.strictEqual(parsedObj.gauges[longName], gauge.value);
+function checkSameGauge(t, gauge, longName) {
+  t.ok(gauge, 'The gauge exists.');
+  t.equal(parsedObj.gauges[longName], gauge.value, 'The gauge has the expected value.');
 }
 
-function checkSameTimer(assert, timer, longName) {
+function checkSameTimer(t, timer, longName) {
   var foundPercentiles = false;
-  assert.ok(timer);
-  assert.strictEqual(parsedObj.timer_data[longName].count, timer.count);
-  assert.strictEqual(parsedObj.timer_data[longName].count_ps, timer.rate);
-  assert.strictEqual(parsedObj.timer_data[longName].lower, timer.min);
-  assert.strictEqual(parsedObj.timer_data[longName].upper, timer.max);
-  assert.strictEqual(parsedObj.timer_data[longName].mean, timer.avg);
-  assert.strictEqual(parsedObj.timer_data[longName].median, timer.median);
-  assert.strictEqual(parsedObj.timer_data[longName].std, timer.std);
-  assert.ok(parsedObj.hasOwnProperty('pctThreshold') && parsedObj.pctThreshold.length > 0);
-  assert.ok(timer.hasOwnProperty('percentiles'));
+  t.ok(timer, 'The timer exists.');
+  t.equal(parsedObj.timer_data[longName].count, timer.count, 'The timer count has the expected value.');
+  t.equal(parsedObj.timer_data[longName].count_ps, timer.rate, 'The timer rate has the expected value.');
+  t.equal(parsedObj.timer_data[longName].lower, timer.min, 'The timer min has the expected value.');
+  t.equal(parsedObj.timer_data[longName].upper, timer.max, 'The timer max has the expected value.');
+  t.equal(parsedObj.timer_data[longName].mean, timer.avg, 'The timer avg has the expected value.');
+  t.equal(parsedObj.timer_data[longName].median, timer.median, 'The timer median has the expected value.');
+  t.equal(parsedObj.timer_data[longName].std, timer.std, 'The timer std has the expected value.');
+  t.ok(parsedObj.hasOwnProperty('pctThreshold') && parsedObj.pctThreshold.length > 0, 'The fixture has a pctThreshold.');
+  t.ok(timer.hasOwnProperty('percentiles'), 'The timer has percentiles.');
   // there should be one for each of pctThreshold, except for 999, which usually gets cut for being incomplete.
-  assert.ok(parsedObj.pctThreshold.length - Object.keys(timer.percentiles).length <= 1);
-  
+  t.ok(parsedObj.pctThreshold.length - Object.keys(timer.percentiles).length <= 1, 'The timer has the expected percentiles');
+
   Object.keys(timer.percentiles).forEach(function(percentile) {
-    assert.strictEqual(parsedObj.timer_data[longName]['mean_' + percentile], timer.percentiles[percentile].avg);
-    assert.strictEqual(parsedObj.timer_data[longName]['upper_' + percentile], timer.percentiles[percentile].max);
-    assert.strictEqual(parsedObj.timer_data[longName]['sum_' + percentile], timer.percentiles[percentile].sum);
+    t.equal(parsedObj.timer_data[longName]['mean_' + percentile], timer.percentiles[percentile].avg, 'This percentile had the expected avg.');
+    t.equal(parsedObj.timer_data[longName]['upper_' + percentile], timer.percentiles[percentile].max, 'This percentile had the expected max.');
+    t.equal(parsedObj.timer_data[longName]['sum_' + percentile], timer.percentiles[percentile].sum, 'This percentile had the expected sum.');
     foundPercentiles = true;
   });
-  assert.ok(foundPercentiles);
+  t.ok(foundPercentiles, 'Percentiles were found.');
 }
 
-function checkSameSet(assert, set, longName) {
-  assert.ok(set);
+function checkSameSet(t, set, longName) {
+  t.ok(set, 'The set exists.');
   var values = Object.keys(parsedObj.sets[longName].store);
   values.sort();
   set.values.sort();
-  assert.ok(values.length > 0);
-  assert.deepEqual(values, set.values);
+  t.ok(values.length > 0, 'The set had at least 1 value.');
+  t.deepEqual(values, set.values, 'The set had the expected values.');
 }
 
 function arrayReduce(dict, element) {
@@ -72,90 +75,90 @@ function arrayReduce(dict, element) {
   return dict;
 }
 
-exports['setUp'] = function(test, assert) {
-  parsedObj = JSON.parse(fs.readFileSync('tests/metrics_bundle.json'));
-  assert.ok(parsedObj);
-  test.finish();
-}
+test('setUp', function(t) {
+  parsedObj = require('./metrics_bundle.json');
+  t.ok(parsedObj, 'The fixture was properly loaded.');
+  t.end();
+});
 
-exports['test_counters'] = function(test, assert) {
+test('counters', function(t) {
   var counters = metric_utils.extractCounters(parsedObj),
       names = ['internal.bad_lines_seen', 'internal.packets_received', '3333333.C1s', '3333333.C200ms', '4444444.C10s', '3333333.C29s'],
       visitCount = 0,
       counterDict = counters.reduce(arrayReduce, {});
-  
-  assert.strictEqual(6, counters.length);
-  assert.strictEqual(0, visitCount);
-  
+
+  t.equal(6, counters.length, 'There are 6 counters.');
+  t.equal(0, visitCount, 'The visit count is 0.');
+
   // ensure all the values were copied across.
   names.forEach(function(key) {
-    checkSameCounter(assert, counterDict[key], key);
+    checkSameCounter(t, counterDict[key], key);
     visitCount += 1;
   });
-  
-  assert.strictEqual(6, visitCount);
-  
-  test.finish();
-}
 
-exports['test_gauges'] = function(test, assert) {
+  t.equal(6, visitCount, 'Each counter was represented.');
+
+  t.end();
+});
+
+test('gauges', function(t) {
   var gauges = metric_utils.extractGauges(parsedObj),
       names = ['3333333.G1s', '4444444.G200ms', '3333333.G10s', 'internal.timestamp_lag'],
       visitCount = 0,
       gaugeDict = gauges.reduce(arrayReduce, {});
-  
-  assert.strictEqual(4, gauges.length);
-  assert.strictEqual(0, visitCount);
-  
+
+  t.equal(4, gauges.length, 'There are 4 counters.');
+  t.equal(0, visitCount, 'The visit count is 0.');
+
   names.forEach(function(key) {
-    checkSameGauge(assert, gaugeDict[key], key);
+    checkSameGauge(t, gaugeDict[key], key);
     visitCount += 1;
   });
-  
-  assert.strictEqual(4, visitCount);
-  
-  test.finish();
-}
 
-exports['test_sets'] = function(test, assert) {
+  t.equal(4, visitCount, 'Each gauage was checked.');
+
+  t.end();
+});
+
+test('sets', function(t) {
   var sets = metric_utils.extractSets(parsedObj),
       names = ['4444444.S1s', '3333333.S500ms'],
       visitCount = 0,
       setDict = sets.reduce(arrayReduce, {});
-  
-  assert.strictEqual(2, sets.length);
-  assert.strictEqual(0, visitCount);
-  
+
+  t.strictEqual(2, sets.length, 'There are 2 sets.');
+  t.strictEqual(0, visitCount, 'The visit count is 0.');
+
   names.forEach(function(key) {
-    checkSameSet(assert, setDict[key], key);
+    checkSameSet(t, setDict[key], key);
     visitCount += 1;
   });
-  
-  assert.strictEqual(2, visitCount);
-  
-  test.finish();
-}
 
-exports['test_timers'] = function(test, assert) {
+  t.strictEqual(2, visitCount, 'Each set was checked.');
+
+  t.end();
+});
+
+test('timers', function(t) {
   var timers = metric_utils.extractTimers(parsedObj),
       names = ['4444444.T1s',  '3333333.T200ms', '3333333.T10s', '3333333.T29s'],
       visitCount = 0,
       timerDict = timers.reduce(arrayReduce, {});
-  
-  assert.ok(parsedObj.hasOwnProperty('pctThreshold'));
-  assert.strictEqual(5, parsedObj.pctThreshold.length);
-  assert.strictEqual(4, timers.length);
-  assert.strictEqual(0, visitCount);
-  
+
+  t.ok(parsedObj.hasOwnProperty('pctThreshold'), 'Our fixture has thresholds.');
+  t.equal(5, parsedObj.pctThreshold.length, 'The fixture has 5 thresholds.');
+  t.equal(4, timers.length, 'There are 4 timers.');
+  t.equal(0, visitCount, 'The visit count is 0.');
+
   names.forEach(function(key) {
-    checkSameTimer(assert, timerDict[key], key);
+    checkSameTimer(t, timerDict[key], key);
     visitCount += 1;
   });
-  
-  assert.strictEqual(visitCount, 4);
-  
-  test.finish();
-}
+
+  t.equal(visitCount, 4, 'Each timer was checked.');
+
+  t.end();
+});
 
 function elementWithName(name) {
   return function(a, b) {
@@ -179,110 +182,110 @@ function countMetrics(json) {
   return count;
 }
 
-exports['test_grouping_by_parsed_tenant'] = function(test, assert) {
+test('grouping by parsed tenant', function(t) {
   var tenantMap = metric_utils.groupMetricsByTenant(parsedObj),
       tenants = ['3333333', '4444444', 'internal'];
-  
-  assert.strictEqual(3, Object.keys(tenantMap).length);
-  tenants.forEach(function(tenantId) {
-    assert.ok(tenantMap.hasOwnProperty(tenantId));
-  });
-  
-  checkSameCounter(assert, tenantMap['3333333'].counters.reduce(elementWithName('C1s')), '3333333.C1s');
-  checkSameCounter(assert, tenantMap['3333333'].counters.reduce(elementWithName('C200ms')), '3333333.C200ms');
-  checkSameCounter(assert, tenantMap['3333333'].counters.reduce(elementWithName('C29s')), '3333333.C29s');
-  checkSameCounter(assert, tenantMap['4444444'].counters.reduce(elementWithName('C10s')), '4444444.C10s');
-  checkSameCounter(assert, tenantMap['internal'].counters.reduce(elementWithName('bad_lines_seen')), 'internal.bad_lines_seen');
-  checkSameCounter(assert, tenantMap['internal'].counters.reduce(elementWithName('packets_received')), 'internal.packets_received');
-  
-  checkSameGauge(assert, tenantMap['3333333'].gauges.reduce(elementWithName('G1s')), '3333333.G1s');
-  checkSameGauge(assert, tenantMap['3333333'].gauges.reduce(elementWithName('G10s')), '3333333.G10s');
-  checkSameGauge(assert, tenantMap['4444444'].gauges.reduce(elementWithName('G200ms')), '4444444.G200ms');
-  checkSameGauge(assert, tenantMap['internal'].gauges.reduce(elementWithName('timestamp_lag')), 'internal.timestamp_lag');
-  
-  checkSameTimer(assert, tenantMap['4444444'].timers.reduce(elementWithName('T1s')), '4444444.T1s');
-  checkSameTimer(assert, tenantMap['3333333'].timers.reduce(elementWithName('T200ms')), '3333333.T200ms');
-  checkSameTimer(assert, tenantMap['3333333'].timers.reduce(elementWithName('T10s')), '3333333.T10s');
-  checkSameTimer(assert, tenantMap['3333333'].timers.reduce(elementWithName('T29s')), '3333333.T29s');
-  
-  checkSameSet(assert, tenantMap['4444444'].sets.reduce(elementWithName('S1s')), '4444444.S1s');
-  checkSameSet(assert, tenantMap['3333333'].sets.reduce(elementWithName('S500ms')), '3333333.S500ms');
-  
-  test.finish();
-}
 
-exports['test_specific_histogram_extraction'] = function(test, assert) {
+  t.equal(3, Object.keys(tenantMap).length, 'The fixture has 3 tenants.');
+  tenants.forEach(function(tenantId) {
+    t.ok(tenantMap.hasOwnProperty(tenantId), 'The fixture has the tenants we expect.');
+  });
+
+  checkSameCounter(t, tenantMap['3333333'].counters.reduce(elementWithName('C1s')), '3333333.C1s');
+  checkSameCounter(t, tenantMap['3333333'].counters.reduce(elementWithName('C200ms')), '3333333.C200ms');
+  checkSameCounter(t, tenantMap['3333333'].counters.reduce(elementWithName('C29s')), '3333333.C29s');
+  checkSameCounter(t, tenantMap['4444444'].counters.reduce(elementWithName('C10s')), '4444444.C10s');
+  checkSameCounter(t, tenantMap['internal'].counters.reduce(elementWithName('bad_lines_seen')), 'internal.bad_lines_seen');
+  checkSameCounter(t, tenantMap['internal'].counters.reduce(elementWithName('packets_received')), 'internal.packets_received');
+
+  checkSameGauge(t, tenantMap['3333333'].gauges.reduce(elementWithName('G1s')), '3333333.G1s');
+  checkSameGauge(t, tenantMap['3333333'].gauges.reduce(elementWithName('G10s')), '3333333.G10s');
+  checkSameGauge(t, tenantMap['4444444'].gauges.reduce(elementWithName('G200ms')), '4444444.G200ms');
+  checkSameGauge(t, tenantMap['internal'].gauges.reduce(elementWithName('timestamp_lag')), 'internal.timestamp_lag');
+
+  checkSameTimer(t, tenantMap['4444444'].timers.reduce(elementWithName('T1s')), '4444444.T1s');
+  checkSameTimer(t, tenantMap['3333333'].timers.reduce(elementWithName('T200ms')), '3333333.T200ms');
+  checkSameTimer(t, tenantMap['3333333'].timers.reduce(elementWithName('T10s')), '3333333.T10s');
+  checkSameTimer(t, tenantMap['3333333'].timers.reduce(elementWithName('T29s')), '3333333.T29s');
+
+  checkSameSet(t, tenantMap['4444444'].sets.reduce(elementWithName('S1s')), '4444444.S1s');
+  checkSameSet(t, tenantMap['3333333'].sets.reduce(elementWithName('S500ms')), '3333333.S500ms');
+
+  t.end();
+});
+
+test('specific histogram extraction', function(t) {
   // 4444444.T1s should only have four bins.
   var tenantInfo = metric_utils.groupMetricsByTenant(parsedObj)['4444444'],
       timer;
-  
-  assert.ok(tenantInfo.hasOwnProperty('timers'));
-  
-  timer = tenantInfo.timers.reduce(elementWithName('T1s'));
-  
-  assert.ok(timer);
-  assert.ok(timer.hasOwnProperty('histogram'));
-  assert.deepEqual(['bin_100', 'bin_250', 'bin_500', 'bin_inf'], Object.keys(timer.histogram));
-  
-  test.finish();
-}
 
-exports['test_specific_histogram_exclusion'] = function(test, assert) {
+  t.ok(tenantInfo.hasOwnProperty('timers'), 'The fixture has timers for the tenant.');
+
+  timer = tenantInfo.timers.reduce(elementWithName('T1s'));
+
+  t.ok(timer, 'The timer exists.');
+  t.ok(timer.hasOwnProperty('histogram'), 'The timer has a histogram.');
+  t.deepEqual(['bin_100', 'bin_250', 'bin_500', 'bin_inf'], Object.keys(timer.histogram), 'The histogram has the expected bins.');
+
+  t.end();
+});
+
+test('specific histogram exclusion', function(t) {
   // 3333333.T10s should have no histogram.
   var tenantInfo = metric_utils.groupMetricsByTenant(parsedObj)['3333333'],
       timer;
-  
-  assert.ok(tenantInfo.hasOwnProperty('timers'));
-  
-  timer = tenantInfo.timers.reduce(elementWithName('T10s'));
-  
-  assert.ok(timer);
-  assert.ok(!timer.hasOwnProperty('histogram'));
-  
-  test.finish();
-}
 
-exports['test_catch_all_histogram_extraction'] = function(test, assert) {
+  t.ok(tenantInfo.hasOwnProperty('timers'), 'The fixture has timers.');
+
+  timer = tenantInfo.timers.reduce(elementWithName('T10s'));
+
+  t.ok(timer, 'The timer exists.');
+  t.ok(!timer.hasOwnProperty('histogram'), 'The timer does not have a histogram');
+
+  t.end();
+});
+
+test('catch all histogram extraction', function(t) {
   // '3333333.T200ms', '3333333.T29s' should have 11 bins.
   var tenantInfo = metric_utils.groupMetricsByTenant(parsedObj)['3333333'],
       timers = ['T200ms', 'T29s'],
       visitCount = 0,
       timer;
-  
-  assert.ok(tenantInfo.hasOwnProperty('timers'));
-  
+
+  t.ok(tenantInfo.hasOwnProperty('timers'), 'The fixture has timers.');
+
   timers.forEach(function(timerName) {
     timer = tenantInfo.timers.reduce(elementWithName(timerName));
-    assert.ok(timer);
-    assert.ok(timer.hasOwnProperty('histogram'));
-    assert.strictEqual(11, Object.keys(timer.histogram).length);
+    t.ok(timer, 'The timer exists.');
+    t.ok(timer.hasOwnProperty('histogram'), 'The timer has a histogram.');
+    t.equal(11, Object.keys(timer.histogram).length, 'The histogram has 11 bins.');
     visitCount += 1;
   });
-  
-  assert.strictEqual(2, visitCount);
-  
-  test.finish();
-}
+
+  t.equal(2, visitCount, 'Each timer was checked.');
+
+  t.end();
+});
 
 // tests that metrics payloads get broken up into acceptable sizes.
-exports['test_bundling'] = function(test, assert) {
+test('bundling', function(t) {
   var gauges = metric_utils.extractGauges(parsedObj),
       counters = metric_utils.extractCounters(parsedObj),
       timers = metric_utils.extractTimers(parsedObj),
       sets = metric_utils.extractSets(parsedObj),
       jsonArray = http_client.buildPayloadsUnsafe('11111111', 22222222, gauges, counters, timers, sets, 15000, 200),
       actualMetricCount = 0;
-  
+
   // it should have been broken up into 12 bundles.
-  assert.strictEqual(14, jsonArray.length);
-  
+  t.equal(14, jsonArray.length, 'The payload was broken into 14 bundles.');
+
   // ensure that we have the expected number of metrics.
   jsonArray.forEach(function(json) {
     actualMetricCount += countMetrics(json);
   });
-  
-  assert.ok(actualMetricCount > 1);
-  assert.strictEqual(gauges.length + counters.length + timers.length + sets.length, actualMetricCount);
-  
-  test.finish();
-}
+
+  t.ok(actualMetricCount > 1, 'We have more than 1 metric.');
+  t.equal(gauges.length + counters.length + timers.length + sets.length, actualMetricCount, 'All of the bundles had the expected total metrics.');
+
+  t.end();
+});
