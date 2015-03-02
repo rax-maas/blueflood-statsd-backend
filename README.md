@@ -1,4 +1,4 @@
-# Blueflood StatsD Backend [![Build Status](https://secure.travis-ci.org/gdusbabek/blueflood-statsd-backend.png)](http://travis-ci.org/gdusbabek/blueflood-statsd-backend)
+# Blueflood StatsD Backend [![Build Status](https://travis-ci.org/rackerlabs/blueflood-statsd-backend.svg?branch=master)](https://travis-ci.org/rackerlabs/blueflood-statsd-backend)
 
 This is a [statsD backend](https://github.com/etsy/statsd/wiki/Backends) that will send metrics aggregated in statsD
 to an instance of [Blueflood](http://blueflood.io).
