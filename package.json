@@ -7,7 +7,7 @@
     "Tilottama Gaat <tilottama.gaat@rackspace.com>",
     "Justin Gallardo <justin.gallardo@rackspace.com>"
   ],
-  "version": "0.0.5",
+  "version": "0.1.0",
   "main": "lib/blueflood.js",
   "dependencies": {
     "request": "2.45.0"
