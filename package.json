@@ -10,6 +10,7 @@
   "version": "0.1.0",
   "main": "lib/blueflood.js",
   "dependencies": {
+    "log4js": "^2.5.3",
     "request": "2.45.0"
   },
   "devDependencies": {

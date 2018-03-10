@@ -276,8 +276,9 @@ test('bundling', function(t) {
       jsonArray = http_client.buildPayloadsUnsafe('11111111', 22222222, gauges, counters, timers, sets, 15000, 200),
       actualMetricCount = 0;
 
-  // it should have been broken up into 12 bundles.
-  t.equal(14, jsonArray.length, 'The payload was broken into 14 bundles.');
+  // it should have been broken up into 14 bundles.
+  // But, since 5 bundles are bigger than the max size of 200, expected count should be 9
+  t.equal(9, jsonArray.length, 'The payload was broken into 14 bundles. But, since 5 bundles are bigger than the max size of 200, expected count should be 9.');
 
   // ensure that we have the expected number of metrics.
   jsonArray.forEach(function(json) {
@@ -285,7 +286,8 @@ test('bundling', function(t) {
   });
 
   t.ok(actualMetricCount > 1, 'We have more than 1 metric.');
-  t.equal(gauges.length + counters.length + timers.length + sets.length, actualMetricCount, 'All of the bundles had the expected total metrics.');
+  t.equal(gauges.length + counters.length + (timers.length - 4) + (sets.length - 1), actualMetricCount,
+    '4 timers and 1 sets metric (each of them) are bigger than max value. All of the bundles (minus 5 faulty ones) had the expected total metrics.');
 
   t.end();
 });
