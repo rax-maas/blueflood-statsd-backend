@@ -273,14 +273,25 @@ test('bundling', function(t) {
       counters = metric_utils.extractCounters(parsedObj),
       timers = metric_utils.extractTimers(parsedObj),
       sets = metric_utils.extractSets(parsedObj),
-      jsonArray = http_client.buildPayloadsUnsafe('11111111', 22222222, gauges, counters, timers, sets, 15000, 200),
+      maxPayloadSize = 600,
+      jsonArray = http_client.buildPayloadsUnsafe('11111111', 22222222, gauges, counters, timers, sets, 15000, maxPayloadSize),
       actualMetricCount = 0;
 
-  // it should have been broken up into 12 bundles.
-  t.equal(14, jsonArray.length, 'The payload was broken into 14 bundles.');
+  // it should have been broken up into 6 bundles.
+  t.equal(6, jsonArray.length, 'The payload was broken into 6 bundles.');
 
   // ensure that we have the expected number of metrics.
   jsonArray.forEach(function(json) {
+    payloadLength = json.length;
+    if(payloadLength == 643){
+      // This test case is validating one case where just one metric is of size 529
+      // and when this only one metric is added to the empty payload (size = 114), total size (643) goes beyond max (600)
+      // and even though it's bigger than max, it will be sent to Blueflood.
+      t.ok(payloadLength > maxPayloadSize, 'Only one payload of size ' + payloadLength + ' is bigger than max limit.');
+    }
+    else {
+      t.ok(payloadLength <= maxPayloadSize, 'Payload of size ' + payloadLength + ' should be less than or equal to max limit.');
+    }
     actualMetricCount += countMetrics(json);
   });
 
